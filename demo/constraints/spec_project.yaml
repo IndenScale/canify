@@ -1,0 +1,17 @@
+rules:
+  - id: project-singleton
+    name: "全局唯一项目实体"
+    description: "在整个 Canify 项目中，必须且只能存在一个 'project' 类型的实体。"
+    
+    # 这是一个跨实体的集合规则
+    scope: cross-entity
+    
+    levels:
+      verify: error
+      strict: error
+    
+    context: "为了保证项目范围的唯一性和清晰性，Canify 被设计为管理单个核心项目。多个 'project' 实体会导致定义模糊和管理混乱。"
+    constraint: "COUNT(entities WHERE type == 'project') == 1"
+    
+    fixture: null # 简单的集合校验，无需 fixture
+    test_case: "test_cases.project_rules.check_single_project_entity" # 指向 Agent 要生成的 Python 函数

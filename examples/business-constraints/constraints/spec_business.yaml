@@ -1,0 +1,46 @@
+rules:
+  - id: budget-allocation
+    name: "预算分配约束"
+    description: "所有任务的总预算不能超过项目预算"
+
+    scope: cross-entity
+
+    levels:
+      verify: warning
+      validate: error
+
+    context: "为了确保项目的财务可行性，所有任务的预算总和必须控制在项目总预算范围内。"
+    constraint: "SUM(task.budget) <= project.budget"
+
+    test_case: "test_cases.business_rules.check_budget_allocation"
+
+  - id: team-member-assignment
+    name: "团队成员分配约束"
+    description: "任务负责人必须是项目团队成员"
+
+    scope: cross-entity
+
+    levels:
+      verify: error
+      validate: error
+
+    context: "任务负责人必须在项目团队中，以确保责任明确和资源可用性。"
+    constraint: "task.assignee in project.team_members"
+
+    test_case: "test_cases.business_rules.check_team_member_assignment"
+
+  - id: status-consistency
+    name: "状态一致性约束"
+    description: "已完成的任务不能重新激活"
+
+    scope: intra-entity
+    target_entity: task
+
+    levels:
+      verify: warning
+      validate: error
+
+    context: "已完成的任务状态应该是终态的，不应该被重新激活。"
+    constraint: "task.status != 'completed' => task.status != 'in-progress'"
+
+    test_case: "test_cases.business_rules.check_status_consistency"
