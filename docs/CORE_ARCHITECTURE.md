@@ -258,7 +258,7 @@ constraints:
 
 **技术栈:**
 
-- Python 3.9+
+- Python 3.14+
 - Pydantic 2.0+
 - Typer (CLI 框架)
 - SQLAlchemy (数据库 ORM)

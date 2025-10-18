@@ -1,0 +1,299 @@
+# Canify Schema 语法增强讨论记录
+# 日期: 2025-10-18
+# 参与者: Claude Code, 用户
+
+issue_id: "schema-enhancement-001"
+title: "增强 Schema 语法以支持自动推断和类型化引用"
+status: "discussed"
+priority: "high"
+created_at: "2025-10-18"
+updated_at: "2025-10-18"
+
+participants:
+  - "Claude Code"
+  - "用户"
+
+background: |
+  当前 Canify 校验架构采用分层设计：
+  - CLI 层：执行基本词法校验，提取模式、声明、引用、规则
+  - Pydantic 层：执行语法校验与简单语义校验
+  - Spec 层：通过 spec_*.yaml 执行所有复杂语义校验
+
+  当前局限性：
+  - 大量语义校验集中在 spec 文件中，维护成本高
+  - 无法在模型定义时表达类型约束
+  - 引用校验不够精确，无法确保实体存在性和类型匹配
+  - 缺乏自动推断能力
+
+current_validation_architecture:
+  cli_layer:
+    responsibility: "词法分析"
+    tasks:
+      - "提取有效的模式、声明、引用、规则"
+      - "基本格式校验"
+    location: "src/commands/*.py"
+
+  pydantic_layer:
+    responsibility: "语法校验与简单语义校验"
+    tasks:
+      - "数据类型验证"
+      - "必填字段检查"
+      - "基础格式校验"
+    tools:
+      - "Pydantic BaseModel"
+      - "validator 装饰器"
+    location: "src/core/models/"
+
+  spec_layer:
+    responsibility: "复杂语义校验"
+    tasks:
+      - "跨实体业务规则"
+      - "引用完整性检查"
+      - "复杂约束验证"
+    tools:
+      - "spec_*.yaml 规则定义"
+      - "Python 测试函数"
+    location: "constraints/"
+
+current_limitations:
+  - "语义校验过度集中在 spec 层，维护成本高"
+  - "无法在模型定义时表达类型约束"
+  - "引用校验不够精确"
+  - "缺乏自动推断能力"
+  - "spec 文件容易变得臃肿"
+
+proposed_solution:
+  proposer: "用户"
+  date: "2025-10-18"
+  summary: |
+    使用 Pydantic Annotated 类型将大量语义校验从 spec 层卸载到 models 层：
+    - 在模型定义时表达类型约束，实现自动推断
+    - 减少 spec 文件的维护成本
+    - 提供编译时和运行时的双重保障
+
+optimization_goal: |
+  将以下类型的语义校验从 spec 层迁移到 models 层：
+  - 实体引用格式校验 (entity:// 格式)
+  - 引用实体存在性校验
+  - 引用实体类型约束校验
+  - 简单的跨字段约束
+
+implementation_details:
+  syntax_validation:
+    description: "使用 Pydantic BeforeValidator 进行语法格式校验"
+    code_example: |
+      from pydantic.functional_validators import BeforeValidator
+
+      def validate_ref_format(v):
+          if not isinstance(v, str) or not v.startswith('entity://'):
+              raise ValueError("必须是 'entity://' 格式的引用")
+          return v
+
+      CanifyReference = Annotated[str, BeforeValidator(validate_ref_format)]
+
+  semantic_validation:
+    description: "使用自定义元数据进行语义分析"
+    code_example: |
+      # 自定义元数据对象，Pydantic 不认识它
+      class Ref:
+          def __init__(self, entity_type: str):
+              self.entity_type = entity_type
+
+      # 在 models/service.py 中
+      from pydantic import BaseModel
+      from canify.types import CanifyReference, Ref
+      from typing import Annotated
+
+      class Service(BaseModel):
+          # 这个类型提示有 *两层* 元数据
+          owner: Annotated[CanifyReference, Ref("Team")]
+
+  layered_validation_strategy:
+    pydantic_layer:
+      responsibility: "语法分析"
+      checks:
+        - "字段类型是否为字符串"
+        - "字符串格式是否为 'entity://' 开头"
+        - "基本的数据类型约束"
+    canify_server_layer:
+      responsibility: "语义分析"
+      checks:
+        - "引用的实体 ID 是否存在"
+        - "引用的实体类型是否符合 Ref 约束"
+        - "跨实体的业务规则"
+
+architecture_implications:
+  validation_architecture_evolution:
+    before_optimization:
+      cli_layer: "词法分析"
+      pydantic_layer: "语法校验 + 简单语义校验"
+      spec_layer: "所有复杂语义校验（维护成本高）"
+    after_optimization:
+      cli_layer: "词法分析"
+      pydantic_layer: "语法校验 + 基础语义校验"
+      models_layer: "类型约束 + 引用校验（自动推断）"
+      spec_layer: "真正复杂的业务规则（维护成本低）"
+
+  pydantic_models:
+    changes:
+      - "引入 CanifyReference 类型别名"
+      - "使用 Annotated 类型添加元数据"
+      - "定义 Ref 元数据类"
+    location: "src/canify/types.py"
+
+  validation_engine:
+    changes:
+      - "扩展 Schema 验证阶段"
+      - "添加实体引用语义验证"
+      - "集成类型约束检查"
+    location: "src/core/validation_engine.py"
+
+  server_integration:
+    changes:
+      - "在语义分析阶段使用符号表"
+      - "实现类型约束解析器"
+      - "提供实体类型查询接口"
+
+benefits:
+  - "维护成本降低：将大量语义校验从 spec 迁移到 models"
+  - "类型安全：编译时和运行时双重保障"
+  - "自动推断：从代码中自动提取类型约束"
+  - "语义丰富：支持复杂的跨实体关系"
+  - "开发体验：IDE 友好的类型提示"
+  - "可扩展性：易于添加新的验证规则"
+
+migration_example:
+  before_optimization:
+    spec_file: "constraints/spec_references.yaml"
+    content: |
+      rules:
+        - id: "service-owner-reference"
+          name: "服务所有者引用校验"
+          levels:
+            verify: warning
+            validate: error
+          test_case: "business_rules.check_service_owner_reference"
+        - id: "service-dependencies-reference"
+          name: "服务依赖引用校验"
+          levels:
+            verify: warning
+            validate: error
+          test_case: "business_rules.check_service_dependencies_reference"
+
+    python_test_function: |
+      def check_service_owner_reference(symbol_table):
+          for service in symbol_table.get_entities_by_type("service"):
+              owner_ref = service.raw_data.get("owner")
+              if owner_ref and not owner_ref.startswith("entity://"):
+                  raise BusinessRuleViolation(
+                      "service-owner-reference",
+                      f"服务 {service.entity_id} 的所有者引用格式错误: {owner_ref}",
+                      service.location
+                  )
+              # 检查引用实体是否存在且类型为 Team
+              # ... 更多复杂逻辑
+
+  after_optimization:
+    spec_file: "constraints/spec_references.yaml"
+    content: |
+      # 大部分引用校验已迁移到 models 层，此文件可能为空或只包含真正复杂的规则
+
+    pydantic_model: |
+      from pydantic import BaseModel
+      from canify.types import CanifyReference, Ref
+      from typing import Annotated, List
+
+      class Service(BaseModel):
+          type: str = "service"
+          id: str
+          name: str
+          # 自动校验：格式 + 存在性 + 类型约束
+          owner: Annotated[CanifyReference, Ref("Team")]
+          # 自动校验：每个依赖项都必须是 Database 类型实体
+          dependencies: List[Annotated[CanifyReference, Ref("Database")]]
+
+implementation_phases:
+  phase_1:
+    name: "基础语法验证"
+    tasks:
+      - "实现 CanifyReference 类型"
+      - "添加 Pydantic BeforeValidator"
+      - "更新现有实体模型"
+    estimated_time: "1周"
+
+  phase_2:
+    name: "语义分析集成"
+    tasks:
+      - "实现 Ref 元数据类"
+      - "扩展验证引擎支持语义检查"
+      - "集成符号表查询"
+    estimated_time: "2周"
+
+  phase_3:
+    name: "类型约束系统"
+    tasks:
+      - "实现类型约束解析器"
+      - "添加类型继承和多态支持"
+      - "提供类型查询 API"
+    estimated_time: "2周"
+
+  phase_4:
+    name: "工具链集成"
+    tasks:
+      - "IDE 插件支持"
+      - "文档生成"
+      - "性能优化"
+    estimated_time: "1周"
+
+example_usage:
+  entity_declaration: |
+    ```entity
+    type: "service"
+    id: "auth-service"
+    name: "认证服务"
+    owner: "entity://team-security"  # 必须引用 Team 类型的实体
+    dependencies:
+      - "entity://db-postgres"       # 必须引用 Database 类型的实体
+      - "entity://cache-redis"       # 必须引用 Cache 类型的实体
+    ```
+
+  pydantic_model: |
+    from pydantic import BaseModel
+    from canify.types import CanifyReference, Ref
+    from typing import Annotated, List
+
+    class Service(BaseModel):
+        type: str = "service"
+        id: str
+        name: str
+        owner: Annotated[CanifyReference, Ref("Team")]
+        dependencies: List[Annotated[CanifyReference, Ref("Database")]]
+
+related_issues:
+  - "architecture-evolution-001"  # 状态化服务器架构
+
+next_steps:
+  - "设计详细的类型系统规范"
+  - "实现 Pydantic 验证器原型"
+  - "更新 CORE_ARCHITECTURE.md 文档"
+  - "创建测试用例验证功能"
+
+notes: |
+  这个方案的核心价值在于将语义校验从臃肿的 spec 文件迁移到类型化的 models 中：
+
+  - **维护成本大幅降低**：不再需要在 spec 文件中重复编写基础引用校验
+  - **自动推断能力**：从类型定义中自动提取约束，无需手动维护
+  - **开发体验提升**：IDE 提供实时类型提示和错误检测
+  - **架构清晰**：各层职责更加明确，spec 层专注于真正复杂的业务规则
+
+  通过 Pydantic Annotated 类型，我们实现了：
+  - 语法层由 Pydantic 负责，确保格式正确
+  - 语义层由 Canify Server 负责，确保引用有效且类型匹配
+  - 类型约束在模型定义时表达，实现自动推断
+
+---
+# 设计原则
+# 1. 关注点分离：语法 vs 语义 vs 业务规则
+# 2. 自动推断：从类型定义中提取约束
+# 3. 维护优化：减少 spec 文件复杂度
+# 4. 开发友好：提供良好的 IDE 支持

@@ -1,0 +1,116 @@
+# Canify 架构演进讨论记录
+# 日期: 2025-10-18
+# 参与者: Claude Code, 用户
+
+issue_id: "architecture-evolution-001"
+title: "Canify 状态化服务器架构设计讨论"
+status: "discussed"
+priority: "high"
+created_at: "2025-10-18"
+updated_at: "2025-10-18"
+
+participants:
+  - "Claude Code"
+  - "用户"
+
+background: |
+  当前 Canify 实现存在性能瓶颈：
+  - 每次验证都要重新解析所有 Markdown 文件
+  - 无状态模型导致重复计算
+  - 缺乏增量更新机制
+  - 不支持实时协作和多分支开发
+
+initial_proposal:
+  proposer: "Claude Code"
+  date: "2025-10-18"
+  summary: |
+    设计复杂的状态化服务器架构：
+    - 持久化符号表管理
+    - 增量更新机制
+    - 多分支支持
+    - 实时同步服务
+  components:
+    - "SymbolTableManager (持久化符号表管理)"
+    - "FileWatcherService (文件变化监听)"
+    - "ValidationService (验证服务)"
+    - "QueryService (查询服务)"
+    - "BranchManager (多分支支持)"
+    - "CacheManager (缓存管理)"
+  concerns:
+    - "实现复杂度高"
+    - "状态同步复杂"
+    - "过度设计"
+
+refined_proposal:
+  proposer: "用户"
+  date: "2025-10-18"
+  summary: |
+    优雅的三层架构设计：
+    - Watdog: 监控目录，发现文件变动，分支切换时冷启动
+    - CLI: 解析模式、实体、引用、规则，向 Server 报告变动
+    - Server: 维护视图，提供校验服务
+  components:
+    watdog:
+      responsibilities:
+        - "监控目录文件变动"
+        - "检测分支切换"
+        - "分支切换时冷启动重新计算"
+      advantages:
+        - "保持简单性"
+        - "避免复杂的增量状态管理"
+    cli:
+      responsibilities:
+        - "从 Watdog 接收文件变动"
+        - "解析模式、实体、引用、规则"
+        - "向 Server 报告结构化变动信息"
+      advantages:
+        - "客户端负责复杂解析"
+        - "服务端保持轻量"
+    server:
+      responsibilities:
+        - "维护视图"
+        - "提供校验服务"
+      view_strategies:
+        - "分支视图: 按分支隔离"
+        - "写时物化: 持久化存储基础数据"
+        - "会话视图: 临时计算视图"
+        - "读时计算: 按需计算复杂关系"
+      advantages:
+        - "视图计算灵活"
+        - "避免过度预计算"
+
+key_decisions:
+  - decision: "采用三层架构而非单体服务器"
+    rationale: "关注点分离清晰，各组件职责单一"
+    impact: "高"
+  - decision: "分支切换时采用冷启动策略"
+    rationale: "避免复杂的增量状态同步，保持实现简单性"
+    impact: "中"
+  - decision: "视图策略采用写时物化 + 读时计算"
+    rationale: "平衡存储开销和计算性能"
+    impact: "高"
+
+advantages_of_refined_design:
+  - "关注点分离清晰: Watdog(监控) / CLI(解析) / Server(计算)"
+  - "状态管理简化: 冷启动避免复杂增量同步"
+  - "扩展性优秀: 每个组件可独立扩展"
+  - "实现复杂度低: 避免复杂的增量更新算法"
+
+next_steps:
+  - "设计 Watdog 组件的详细接口规范"
+  - "定义 CLI 与 Server 的通信协议"
+  - "制定视图策略的具体实现方案"
+  - "创建原型验证架构可行性"
+
+related_files:
+  - "docs/CORE_ARCHITECTURE.md"
+  - "docs/TECHNOLOGY_STACK.md"
+  - "docs/ARCHITECTURE_DECISIONS.md"
+
+notes: |
+  用户的方案通过合理的职责分离和冷启动策略，在保持功能完整性的同时
+  大幅简化了实现复杂度，是真正优雅实用的解决方案。
+
+---
+# 优雅的工作流程
+# 文件变动 → Watdog → CLI解析 → Server视图更新 → 校验服务
