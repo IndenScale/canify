@@ -274,7 +274,17 @@ class IPCServer:
     def _handle_shutdown(self, params: Dict[str, Any]) -> Dict[str, Any]:
         """处理关闭请求"""
         logger.info("收到关闭请求")
-        # 在实际实现中，这里应该优雅地关闭服务器
+
+        # 在单独的线程中停止服务器，避免阻塞响应
+        def shutdown_async():
+            import time
+            time.sleep(0.1)  # 确保响应先发送给客户端
+            self.stop()
+
+        import threading
+        shutdown_thread = threading.Thread(target=shutdown_async, daemon=True)
+        shutdown_thread.start()
+
         return {"message": "shutdown initiated"}
 
     def __enter__(self):

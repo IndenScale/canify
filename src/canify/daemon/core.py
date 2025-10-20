@@ -99,8 +99,8 @@ class CanifyDaemon:
 
         # 启动事件处理线程
         self.is_running = True
-        self.event_thread = threading.Thread(target=self._event_loop, daemon=True)
-        self.processing_thread = threading.Thread(target=self._processing_loop, daemon=True)
+        self.event_thread = threading.Thread(target=self._event_loop, daemon=False)
+        self.processing_thread = threading.Thread(target=self._processing_loop, daemon=False)
 
         self.event_thread.start()
         self.processing_thread.start()
@@ -159,6 +159,10 @@ class CanifyDaemon:
             RPCMethods.GET_STATUS,
             self._handle_get_status
         )
+        self.ipc_server.register_method(
+            RPCMethods.SHUTDOWN,
+            self._handle_shutdown
+        )
 
         # 项目相关方法
         self.ipc_server.register_method(
@@ -196,6 +200,22 @@ class CanifyDaemon:
             "is_running": self.is_running,
             "project_id": self.project_id
         }
+
+    def _handle_shutdown(self, params: Dict[str, Any]) -> Dict[str, Any]:
+        """处理关闭请求"""
+        logger.info("收到关闭请求")
+
+        # 在单独的线程中停止 daemon，避免阻塞响应
+        def shutdown_async():
+            import time
+            time.sleep(0.1)  # 确保响应先发送给客户端
+            self.stop()
+
+        import threading
+        shutdown_thread = threading.Thread(target=shutdown_async, daemon=True)
+        shutdown_thread.start()
+
+        return {"message": "shutdown initiated"}
 
     def _handle_get_project_status(self, params: Dict[str, Any]) -> Dict[str, Any]:
         """处理获取项目状态请求"""
