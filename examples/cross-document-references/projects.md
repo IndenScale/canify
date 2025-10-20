@@ -31,7 +31,7 @@ created_at: "2025-10-17"
 ## 附录：项目实体定义
 
 ```entity
-type: project
+type: Project
 id: project-canify
 name: Canify 开发项目
 budget: 50000.0
@@ -40,7 +40,7 @@ dependencies: ["project-testing"]
 ```
 
 ```entity
-type: project
+type: Project
 id: project-docs
 name: 文档系统项目
 budget: 20000.0
@@ -49,7 +49,7 @@ dependencies: ["project-canify"]
 ```
 
 ```entity
-type: project
+type: Project
 id: project-testing
 name: 测试框架项目
 budget: 15000.0
@@ -58,7 +58,7 @@ dependencies: []
 ```
 
 ```entity
-type: project
+type: Project
 id: project-deployment
 name: 部署系统项目
 budget: 25000.0

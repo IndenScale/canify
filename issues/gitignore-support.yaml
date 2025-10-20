@@ -1,0 +1,62 @@
+# Canify 特性演进讨论记录
+# 特性: Gitignore 支持和独立 Canifyignore 文件
+# 日期: 2025-10-18
+# 参与者: Claude Code, 用户
+
+issue_id: "feature-evolution-004"
+title: "Canify Gitignore 支持和独立 Canifyignore 文件"
+status: "discussed"
+priority: "medium"
+created_at: "2025-10-18"
+updated_at: "2025-10-18"
+
+participants:
+  - "Claude Code"
+  - "用户"
+
+background: |
+  当前 Canify 扫描所有 Markdown 文件，包括一些应该被忽略的文件（如构建输出、缓存文件等）。
+  缺乏对 .gitignore 的支持导致不必要的文件扫描和验证。
+
+current_implementation:
+  - "扫描所有 *.md 文件"
+  - "忽略 .gitignore 规则"
+  - "无自定义忽略文件支持"
+
+proposed_feature:
+  summary: |
+    实现对 .gitignore 的尊重，并支持独立的 .canifyignore 文件。
+  benefits:
+    - "性能优化：避免扫描不必要的文件"
+    - "配置灵活：支持项目特定的忽略规则"
+    - "标准兼容：与 Git 工作流保持一致"
+    - "用户体验：减少误报和无关验证"
+  implementation_approach:
+    - "解析和尊重 .gitignore 文件"
+    - "支持 .canifyignore 自定义忽略文件"
+    - "实现忽略规则的优先级处理"
+    - "提供忽略规则的调试工具"
+
+stage: "第二阶段（性能优化）"
+
+rationale_for_priority:
+  - "性能优化的重要组成部分"
+  - "与现有开发工具链集成"
+  - "避免验证无关文件的资源浪费"
+
+related_features:
+  - "watchdog-file-watching (相关但独立)"
+
+next_steps:
+  - "设计忽略规则解析器"
+  - "实现 .gitignore 兼容性"
+  - "定义 .canifyignore 文件格式"
+  - "测试忽略规则的优先级"
+
+notes: |
+  这是一个相对独立的配置特性，可以在文件扫描机制稳定后实现。
+  忽略文件支持为大型项目的性能优化提供重要保障。
+
+---
+# 忽略规则优先级
+# .canifyignore > .gitignore > 默认忽略规则

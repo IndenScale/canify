@@ -1,0 +1,74 @@
+title: "通过标签（Tags）实现对 Spec 规则的灵活过滤"
+status: "accepted"
+version: "v0.2.0"
+created_date: "2025-10-20"
+authors:
+  - "Gemini"
+
+summary: |
+  为 Spec 系统引入标签（tags）机制，允许用户在运行时通过布尔表达式灵活地选择执行哪些业务规则。这将统一本地和远程验证器的管理，并大幅提升规则库的可维护性。
+
+problem: |
+  随着业务规则（Specs）数量的增加，我们需要一种比 `env: local | remote` 更精细化的控制机制。
+  当前系统无法满足以下场景：
+  1. 只运行一小部分核心规则作为“冒烟测试”。
+  2. 在 CI 流程中，跳过已知很慢的规则以加速反馈。
+  3. 针对特定业务领域（如“合规性”、“安全性”）执行专项验证。
+  缺乏灵活的过滤能力会降低开发效率和验证系统的可用性。
+
+proposal: |
+  1. **在 `spec_*.yaml` 中添加 `tags` 字段**:
+     在每条规则的定义中，增加一个可选的 `tags` 字段，它是一个字符串列表。
+     ```yaml
+     rules:
+       - id: "budget-allocation"
+         name: "预算分配约束"
+         tags: ["core", "finance"]
+         env: local
+         # ...
+       - id: "owner-level-check"
+         name: "负责人级别校验"
+         tags: ["hr", "slow"]
+         env: remote
+         # ...
+     ```
+
+  2. **为 `canify validate` 命令添加 `--tags` 参数**:
+     允许用户通过 `--tags` 参数传入一个布尔表达式来过滤要执行的规则。
+     ```bash
+     # 运行所有标记为 finance 的规则
+     canify validate --tags "finance"
+
+     # 运行标记为 core 且未标记为 slow 的规则
+     canify validate --tags "core and not slow"
+
+     # 运行 security 或 compliance 相关规则
+     canify validate --tags "security or compliance"
+     ```
+
+design_considerations:
+  - name: "优点 (Pros)"
+    points:
+      - "灵活性: 布尔表达式提供了强大的能力来创建任意规则子集。"
+      - "统一管理: 为本地和远程规则提供了单一、一致的过滤机制。"
+      - "可扩展性: 随着规则库增长，标签系统易于维护，不会变得混乱。"
+      - "语义清晰: 标签为规则赋予了业务维度的元数据，增强了可读性。"
+
+  - name: "实现考量 (Implementation Details)"
+    points:
+      - "布尔表达式解析器: 后端需要实现一个小型解析器来处理标签表达式。"
+      - "与 `env` 字段的整合: `tags` 系统需要与现有的 `env` 字段和谐共存。"
+      - "默认行为: 需要明确不提供 `--tags` 参数时的默认行为（即运行所有适用规则）。"
+
+decision: |
+  我们决定采纳基于标签的过滤方案。
+
+  **关键设计决策**:
+  1. **将 `env` 字段视为隐式标签**: 为了避免混淆和冗余，`env` 字段将被系统在内部视为一个特殊的、自动应用的标签。
+     - `canify validate` (本地) 运行时，系统会自动追加 `and env:local` 的过滤条件。
+     - `canify validate --remote` 运行时，则追加 `and (env:local or env:remote)`。
+     - 这样，用户的 `--tags` 参数只需关注业务逻辑标签。
+
+  2. **支持的布尔操作符**: 表达式支持 `and`, `or`, `not` 以及用括号 `()` 分组。
+
+  3. **默认行为**: 如果不提供 `--tags` 参数，`validate` 命令将执行其上下文中的所有适用规则。

@@ -37,7 +37,7 @@ created_at: "2025-10-17"
 ## 附录：人员实体定义
 
 ```entity
-type: user
+type: User
 id: user-alice
 name: Alice Zhang
 email: alice@example.com
@@ -46,7 +46,7 @@ skills: ["python", "system-design", "architecture"]
 ```
 
 ```entity
-type: user
+type: User
 id: user-bob
 name: Bob Li
 email: bob@example.com
@@ -55,7 +55,7 @@ skills: ["python", "sqlite", "performance"]
 ```
 
 ```entity
-type: user
+type: User
 id: user-charlie
 name: Charlie Chen
 email: charlie@example.com
@@ -64,7 +64,7 @@ skills: ["react", "typescript", "ui-design"]
 ```
 
 ```entity
-type: user
+type: User
 id: user-eve
 name: Eve Wang
 email: eve@example.com
@@ -73,7 +73,7 @@ skills: ["product-planning", "user-research"]
 ```
 
 ```entity
-type: user
+type: User
 id: user-david
 name: David Liu
 email: david@example.com
@@ -82,7 +82,7 @@ skills: ["ui-design", "user-testing", "prototyping"]
 ```
 
 ```entity
-type: user
+type: User
 id: user-fiona
 name: Fiona Yang
 email: fiona@example.com
@@ -91,7 +91,7 @@ skills: ["testing", "qa", "automation"]
 ```
 
 ```entity
-type: user
+type: User
 id: user-george
 name: George Wu
 email: george@example.com

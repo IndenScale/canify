@@ -1,0 +1,64 @@
+# Canify 特性演进讨论记录
+# 特性: 分支视图和检查点视图分离
+# 日期: 2025-10-18
+# 参与者: Claude Code, 用户
+
+issue_id: "feature-evolution-005"
+title: "Canify 分支视图和检查点视图分离"
+status: "discussed"
+priority: "high"
+created_at: "2025-10-18"
+updated_at: "2025-10-18"
+
+participants:
+  - "Claude Code"
+  - "用户"
+
+background: |
+  当前 Canify 缺乏多分支支持和视图管理机制。
+  需要为大规模项目提供高效的分支隔离和视图计算能力。
+
+current_implementation:
+  - "单分支支持"
+  - "无视图管理"
+  - "每次验证重新计算所有关系"
+
+proposed_feature:
+  summary: |
+    实现分支视图（写时物化）和检查点视图（读时计算）的分离架构。
+  benefits:
+    - "多分支支持：为团队协作提供基础"
+    - "性能优化：写时物化减少重复计算"
+    - "资源管理：按需计算复杂关系"
+    - "扩展性：支持大规模项目"
+  implementation_approach:
+    - "分支视图：持久化存储基础数据，按分支隔离"
+    - "检查点视图：临时计算视图，支持复杂查询"
+    - "写时物化：在数据写入时预计算简单关系"
+    - "读时计算：在查询时按需计算复杂关系"
+
+stage: "第二阶段（架构演进）"
+
+rationale_for_priority:
+  - "多分支支持是团队协作的基础"
+  - "视图分离是性能优化的核心"
+  - "为后续的实时协作特性奠定基础"
+
+related_features:
+  - "watchdog-file-watching (依赖)"
+  - "architecture-evolution-001 (相关)"
+
+next_steps:
+  - "设计视图管理 API"
+  - "实现分支隔离机制"
+  - "制定写时物化和读时计算策略"
+  - "性能基准测试"
+
+notes: |
+  这是一个核心架构特性，需要与三层架构（Watchdog/CLI/Server）协同设计。
+  视图分离为 Canify 的大规模应用提供关键支撑。
+
+---
+# 视图策略
+# 分支视图: 持久化 + 写时物化 (基础数据)
+# 检查点视图: 临时 + 读时计算 (复杂关系)

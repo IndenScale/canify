@@ -46,7 +46,7 @@ status: "draft"
 ## 附录：项目实体定义
 
 ```entity
-type: project
+type: Project
 id: canify-development
 name: Canify 开发项目
 budget: 50000.0
@@ -56,7 +56,7 @@ developers: ["user-alice", "user-bob", "user-eve", "user-charlie"]
 ```
 
 ```entity
-type: task
+type: Task
 id: task-001
 name: 需求分析
 project_id: canify-development
@@ -67,7 +67,7 @@ status: completed
 ```
 
 ```entity
-type: task
+type: Task
 id: task-002
 name: 架构设计
 project_id: canify-development
@@ -78,7 +78,7 @@ status: in-progress
 ```
 
 ```entity
-type: task
+type: Task
 id: task-003
 name: 产品规划
 project_id: canify-development

@@ -46,7 +46,7 @@ demo/
 在 `team-directory.md` 中定义了对应的实体：
 
 ```entity-for-demo
-type: user
+type: User
 id: user-alice
 name: Alice Zhang
 ...

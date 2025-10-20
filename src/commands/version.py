@@ -15,5 +15,5 @@ def run_version() -> int:
         退出码：总是返回 0
     """
     console = Console()
-    console.print("Canify v0.1.0")
+    console.print("Canify v0.2.0-dev")
     return 0

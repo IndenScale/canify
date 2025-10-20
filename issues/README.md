@@ -20,7 +20,17 @@ background: "问题背景描述"
 
 ## 当前问题记录
 
+### 架构讨论
+
 - [architecture-discussion.yaml](./architecture-discussion.yaml) - Canify 状态化服务器架构设计讨论
+
+### 特性演进记录
+
+- [fixture-test-case-decorators.yaml](./fixture-test-case-decorators.yaml) - Fixture 和 Test Case 装饰器系统
+- [fixture-test-case-type-system.yaml](./fixture-test-case-type-system.yaml) - Fixture 和 Test Case 类型化系统
+- [watchdog-file-watching.yaml](./watchdog-file-watching.yaml) - Watchdog 文件监听和增量扫描
+- [gitignore-support.yaml](./gitignore-support.yaml) - Gitignore 支持和独立 Canifyignore 文件
+- [branch-checkpoint-views.yaml](./branch-checkpoint-views.yaml) - 分支视图和检查点视图分离
 
 ## 使用指南
 

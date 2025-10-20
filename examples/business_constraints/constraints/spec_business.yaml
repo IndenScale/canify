@@ -1,0 +1,33 @@
+specs:
+  - id: "budget-allocation"
+    name: "预算分配约束"
+    description: "所有任务的总预算不能超过项目预算"
+    levels:
+      verify: warning
+      validate: error
+    fixture: "examples.business_constraints.constraints.test_cases.business_rules.get_project_and_tasks"
+    test_case: "examples.business_constraints.constraints.test_cases.business_rules.check_budget_allocation"
+    tags: ["finance", "core"]
+    env: local
+
+  - id: "team-member-assignment"
+    name: "团队成员分配约束"
+    description: "任务负责人必须是项目团队成员"
+    levels:
+      verify: error
+      validate: error
+    fixture: "examples.business_constraints.constraints.test_cases.business_rules.get_project_and_tasks"
+    test_case: "examples.business_constraints.constraints.test_cases.business_rules.check_team_member_assignment"
+    tags: ["hr", "core"]
+    env: local
+
+  - id: "status-consistency"
+    name: "状态一致性约束"
+    description: "已完成的任务不能重新激活"
+    levels:
+      verify: warning
+      validate: error
+    fixture: "examples.business_constraints.constraints.test_cases.business_rules.get_tasks"
+    test_case: "examples.business_constraints.constraints.test_cases.business_rules.check_status_consistency"
+    tags: ["workflow", "core"]
+    env: local

@@ -1,0 +1,32 @@
+specs:
+  - id: "budget-allocation"
+    name: "预算分配约束"
+    description: "验证项目预算分配是否合理"
+    tags: ["core", "finance"]
+    env: local
+    levels:
+      error: "预算分配必须合理"
+      warning: "建议优化预算分配"
+    fixture: "examples.test_spec.test_fixtures.get_budget_data"
+    test_case: "examples.test_spec.test_cases.validate_budget_allocation"
+
+  - id: "owner-level-check"
+    name: "负责人级别校验"
+    description: "验证项目负责人级别是否符合要求"
+    tags: ["hr", "slow"]
+    env: remote
+    levels:
+      error: "负责人级别不符合要求"
+    fixture: "examples.test_spec.test_fixtures.get_owner_data"
+    test_case: "examples.test_spec.test_cases.validate_owner_level"
+
+  - id: "security-compliance"
+    name: "安全合规检查"
+    description: "验证项目是否符合安全合规要求"
+    tags: ["security", "compliance", "core"]
+    env: local
+    levels:
+      error: "安全合规检查失败"
+      warning: "建议加强安全措施"
+    fixture: "examples.test_spec.test_fixtures.get_security_data"
+    test_case: "examples.test_spec.test_cases.validate_security_compliance"

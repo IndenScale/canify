@@ -1,0 +1,63 @@
+# Canify 特性演进讨论记录
+# 特性: Fixture 和 Test Case 装饰器系统
+# 日期: 2025-10-18
+# 参与者: Claude Code, 用户
+
+issue_id: "feature-evolution-001"
+title: "Canify Fixture 和 Test Case 装饰器系统"
+status: "discussed"
+priority: "medium"
+created_at: "2025-10-18"
+updated_at: "2025-10-18"
+
+participants:
+  - "Claude Code"
+  - "用户"
+
+background: |
+  当前 Canify 的业务规则系统使用简单的 Python 函数调用，缺乏精细的控制机制。
+  现有的实现直接导入 Python 模块执行测试函数，没有装饰器层面的控制。
+
+current_implementation:
+  - "直接导入 Python 模块"
+  - "调用测试函数进行验证"
+  - "缺乏装饰器层面的控制"
+  - "依赖 pytest 装饰器（如果使用）"
+
+proposed_feature:
+  summary: |
+    引入专用的 @canify.fixture 和 @canify.test_case 装饰器，提供更精细的控制能力。
+  benefits:
+    - "更精细的控制：可以在装饰器层面添加元数据和控制逻辑"
+    - "类型安全：支持类型注解和验证"
+    - "性能优化：装饰器可以启用缓存和优化策略"
+    - "可扩展性：便于添加新的装饰器参数和功能"
+  implementation_approach:
+    - "定义 @canify.fixture 装饰器用于数据准备函数"
+    - "定义 @canify.test_case 装饰器用于业务规则验证函数"
+    - "装饰器可以接受参数控制执行行为"
+    - "向后兼容现有函数调用方式"
+
+stage: "第三阶段（高级特性）"
+rationale_for_delayed_implementation:
+  - "当前阶段优先保证核心验证功能的稳定性"
+  - "避免在早期引入过度复杂性"
+  - "装饰器系统在验证系统成熟后更有价值"
+  - "用户需要先熟悉基础验证模式"
+
+related_features:
+  - "fixture-test-case-type-system (依赖此特性)"
+
+next_steps:
+  - "设计装饰器 API 规范"
+  - "制定向后兼容策略"
+  - "在第三阶段实现原型"
+
+notes: |
+  这是一个相对独立的特性，可以在验证系统稳定后独立实现。
+  装饰器系统为后续的类型化特性提供基础。
+
+---
+# 装饰器设计示例
+# @canify.fixture(cache=True, timeout=30)
+# @canify.test_case(priority="high", retry=3)

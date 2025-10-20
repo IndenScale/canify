@@ -1,0 +1,65 @@
+# Canify 特性演进讨论记录
+# 特性: Fixture 和 Test Case 类型化系统
+# 日期: 2025-10-18
+# 参与者: Claude Code, 用户
+
+issue_id: "feature-evolution-002"
+title: "Canify Fixture 和 Test Case 类型化系统"
+status: "discussed"
+priority: "medium"
+created_at: "2025-10-18"
+updated_at: "2025-10-18"
+
+participants:
+  - "Claude Code"
+  - "用户"
+
+background: |
+  当前 Canify 的业务规则系统缺乏类型安全机制，fixture 和 test_case 之间的类型匹配需要运行时检查。
+  这可能导致类型不匹配的错误在运行时才发现。
+
+current_implementation:
+  - "运行时类型检查"
+  - "缺乏编译时类型安全"
+  - "fixture 和 test_case 之间的类型兼容性需要手动验证"
+
+proposed_feature:
+  summary: |
+    为 fixture 和 test_case 系统引入类型化机制，提供编译时类型安全。
+  benefits:
+    - "编译时类型检查：在验证前发现类型不匹配"
+    - "IDE 支持：更好的代码补全和类型提示"
+    - "错误预防：减少运行时类型错误"
+    - "开发体验：更友好的开发工具支持"
+  implementation_approach:
+    - "依赖 fixture-test-case-decorators 特性"
+    - "在装饰器中集成类型注解支持"
+    - "定义 FixtureSignature 和 TestCaseSignature 类型"
+    - "实现类型兼容性验证"
+
+stage: "第三阶段（高级特性）"
+dependencies:
+  - "fixture-test-case-decorators"
+
+rationale_for_delayed_implementation:
+  - "类型化系统在基础验证功能稳定后更有价值"
+  - "需要先建立稳定的 fixture 和 test_case 接口"
+  - "避免在早期引入类型系统的复杂性"
+  - "用户需要先熟悉非类型化的使用方式"
+
+related_features:
+  - "fixture-test-case-decorators (此特性依赖)"
+
+next_steps:
+  - "设计类型签名系统 API"
+  - "制定类型兼容性规则"
+  - "在第三阶段实现类型化原型"
+
+notes: |
+  类型化系统是装饰器系统的自然延伸，提供更强的类型安全保障。
+  这个特性应该在装饰器系统稳定后实现。
+
+---
+# 类型化设计示例
+# @canify.fixture(signature=FixtureTypes.list_of(FixtureTypes.ENTITY_TUPLE))
+# @canify.test_case(expected_input=Tuple)

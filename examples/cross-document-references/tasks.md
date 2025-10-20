@@ -33,7 +33,7 @@ created_at: "2025-10-17"
 ## 附录：任务实体定义
 
 ```entity
-type: task
+type: Task
 id: task-validation
 name: 验证引擎开发
 project_id: project-canify
@@ -44,7 +44,7 @@ dependencies: []
 ```
 
 ```entity
-type: task
+type: Task
 id: task-cache
 name: 缓存系统实现
 project_id: project-canify
@@ -55,7 +55,7 @@ dependencies: ["task-validation"]
 ```
 
 ```entity
-type: task
+type: Task
 id: task-cli
 name: CLI 接口设计
 project_id: project-canify
@@ -66,7 +66,7 @@ dependencies: ["task-validation"]
 ```
 
 ```entity
-type: task
+type: Task
 id: task-editor
 name: 文档编辑器
 project_id: project-docs
@@ -77,7 +77,7 @@ dependencies: ["task-cli"]
 ```
 
 ```entity
-type: task
+type: Task
 id: task-search
 name: 搜索功能
 project_id: project-docs
@@ -88,7 +88,7 @@ dependencies: ["task-validation"]
 ```
 
 ```entity
-type: task
+type: Task
 id: task-permissions
 name: 权限管理
 project_id: project-docs

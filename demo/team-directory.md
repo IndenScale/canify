@@ -42,7 +42,7 @@ status: "active"
 ## 附录：人员实体定义
 
 ```entity
-type: user
+type: User
 id: user-alice
 name: Alice Zhang
 email: alice@canify.dev
@@ -51,7 +51,7 @@ skills: ["project-management", "agile", "documentation"]
 ```
 
 ```entity
-type: user
+type: User
 id: user-bob
 name: Bob Li
 email: bob@canify.dev
@@ -60,7 +60,7 @@ skills: ["python", "architecture", "sqlite", "system-design"]
 ```
 
 ```entity
-type: user
+type: User
 id: user-eve
 name: Eve Wang
 email: eve@canify.dev
@@ -69,7 +69,7 @@ skills: ["product-planning", "user-research", "requirements-analysis"]
 ```
 
 ```entity
-type: user
+type: User
 id: user-charlie
 name: Charlie Chen
 email: charlie@canify.dev

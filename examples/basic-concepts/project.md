@@ -25,7 +25,7 @@ created_at: "2025-10-17"
 ## 附录：实体定义
 
 ```entity
-type: project
+type: Project
 id: basic-project
 name: 基础示例项目
 budget: 10000.0
@@ -34,7 +34,7 @@ manager: user-alice
 ```
 
 ```entity
-type: task
+type: Task
 id: task-analysis
 name: 需求分析
 project_id: basic-project
@@ -45,7 +45,7 @@ status: completed
 ```
 
 ```entity
-type: task
+type: Task
 id: task-design
 name: 架构设计
 project_id: basic-project
@@ -56,7 +56,7 @@ status: in-progress
 ```
 
 ```entity
-type: task
+type: Task
 id: task-testing
 name: 测试实施
 project_id: basic-project

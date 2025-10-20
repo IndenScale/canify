@@ -27,7 +27,7 @@ created_at: "2025-10-17"
 ## 附录：实体定义
 
 ```entity
-type: project
+type: Project
 id: placeholder-project
 name: 占位符示例项目
 budget: TBD
@@ -37,7 +37,7 @@ team_size: TBD
 ```
 
 ```entity
-type: task
+type: Task
 id: task-requirements
 name: 需求收集
 project_id: placeholder-project
@@ -48,7 +48,7 @@ status: in-progress
 ```
 
 ```entity
-type: task
+type: Task
 id: task-technology
 name: 技术选型
 project_id: placeholder-project
@@ -59,7 +59,7 @@ status: in-progress
 ```
 
 ```entity
-type: task
+type: Task
 id: task-architecture
 name: 架构设计
 project_id: placeholder-project

@@ -1,0 +1,62 @@
+# Canify 特性演进讨论记录
+# 特性: Watchdog 文件监听和增量扫描
+# 日期: 2025-10-18
+# 参与者: Claude Code, 用户
+
+issue_id: "feature-evolution-003"
+title: "Canify Watchdog 文件监听和增量扫描"
+status: "discussed"
+priority: "high"
+created_at: "2025-10-18"
+updated_at: "2025-10-18"
+
+participants:
+  - "Claude Code"
+  - "用户"
+
+background: |
+  当前 Canify 每次验证都需要重新扫描所有文件，对于大型项目存在性能问题。
+  缺乏增量更新机制导致重复计算。
+
+current_implementation:
+  - "全量文件扫描"
+  - "无文件变化监听"
+  - "每次验证重新解析所有文件"
+
+proposed_feature:
+  summary: |
+    引入 Watchdog 文件监听机制，实现增量扫描和验证。
+  benefits:
+    - "性能提升：仅处理变更的文件"
+    - "实时响应：文件保存时立即验证"
+    - "资源优化：减少不必要的重复计算"
+    - "用户体验：更快的编辑-验证反馈循环"
+  implementation_approach:
+    - "集成 watchdog 库进行文件监听"
+    - "实现增量解析和验证"
+    - "建立文件变更到验证的管道"
+    - "支持热重载配置"
+
+stage: "第二阶段（性能优化）"
+
+rationale_for_priority:
+  - "性能优化对用户体验影响显著"
+  - "增量扫描是其他优化特性的基础"
+  - "大型项目必须的性能要求"
+
+related_features:
+  - "gitignore-support (相关但独立)"
+
+next_steps:
+  - "评估 watchdog 库的适用性"
+  - "设计增量解析算法"
+  - "实现文件监听原型"
+  - "性能基准测试"
+
+notes: |
+  这是一个相对独立的性能优化特性，可以在核心验证功能稳定后实现。
+  文件监听为后续的实时协作和多分支支持奠定基础。
+
+---
+# 增量扫描设计
+# 文件变更 → 增量解析 → 增量验证 → 结果更新

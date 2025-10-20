@@ -1,0 +1,135 @@
+# Canify Standalone 架构设计
+
+issue_id: canify-standalone-design
+status: design
+priority: high
+created: 2025-10-19
+updated: 2025-10-19
+
+## 概述
+
+本文档记录 Canify Standalone 版本的架构设计讨论结果，包括组件职责、通信协议和关键设计决策。
+
+## 组件职责
+
+### Watchdog (守护进程)
+- **运行模式**: 后台运行的守护进程
+- **职责**:
+  - 文件系统监听和变更检测
+  - 通过 Unix Domain Socket 向 CLI 发送文件事件通知
+- **通信**: CLI ↔ Watchdog 使用 Unix Domain Socket
+
+### CLI (命令行工具)
+- **运行模式**: 无状态、生命周期极短的应用程序
+- **职责**:
+  - 本地符号发现、词法分析、基本语法分析
+  - 通过环境变量和配置文件获取有限信息
+  - 通过 HTTP 与 Server 通信
+  - 接收 Watchdog 事件通知
+- **通信**:
+  - CLI ↔ Server 使用 HTTP/REST
+  - CLI ↔ Watchdog 使用 Unix Domain Socket
+
+### Server (服务进程)
+- **运行模式**: 长期运行的服务进程
+- **职责**:
+  - 维护分支视图、检查点视图
+  - 提供 diff、verify、validate 验证服务
+  - 管理视图状态的持久化存储
+  - 支持基于 checkpoint 的增量更新
+
+## 通信协议设计
+
+### CLI ↔ Server HTTP 通信
+
+#### 视图同步通信
+- **首次同步**: 仅提供 `branch` 字段
+- **增量同步**: 提供 `branch` + `checkpoint_id`
+- **数据内容**: schemas, entities, references, specs 四要素
+- **不传输原始文件**: 只传输结构化符号数据
+
+#### 验证请求通信
+- **简化端点**: `/diff`, `/verify`, `/validate`
+- **请求参数**: `branch` + `checkpoint_id` (可选)
+- **文件范围**: 可选的文件列表，空表示全量验证
+
+### CLI ↔ Watchdog Unix Domain Socket 通信
+
+#### 文件事件通知
+```json
+{
+  "event_type": "created|modified|deleted",
+  "file_path": "docs/project.md",
+  "timestamp": "2025-10-19T10:30:00Z",
+  "checksum": "abc123def456"
+}
+```
+
+## 关键设计决策
+
+### 1. 本地预处理
+- 符号发现、词法分析、基本语法分析在 CLI 本地完成
+- 如果预处理失败，CLI 直接报错，不调用 Server
+- 避免传输原始文件到 Server
+
+### 2. Checkpoint 机制
+- Server 在视图同步后返回 `checkpoint_id`
+- CLI 可选择基于 `branch` 或 `branch + checkpoint_id` 继续工作
+- 支持增量视图更新和冲突检测
+
+### 3. 视图数据模型
+- Server 只存储 Canify 符号表，不存储原始文件
+- 视图包含: schemas, entities, references, specs 四要素
+- 支持分支视图和检查点视图管理
+
+### 4. 错误处理策略
+- **本地错误**: 词法/语法分析失败 → CLI 直接处理
+- **同步错误**: checkpoint 过期/冲突 → Server 返回错误
+- **验证错误**: 语义分析失败 → Server 返回详细错误信息
+
+## API 端点设计
+
+### 视图管理
+- `POST /api/v1/views/sync` - 视图同步（首次或增量）
+- `GET /api/v1/views/{branch}` - 获取分支视图状态
+- `DELETE /api/v1/views/{branch}` - 删除分支视图
+
+### 验证服务
+- `POST /api/v1/diff` - 差异验证
+- `POST /api/v1/verify` - 提交验证
+- `POST /api/v1/validate` - 完整验证
+
+### 系统管理
+- `GET /api/v1/health` - 健康检查
+- `GET /api/v1/metrics` - 性能指标
+
+## 数据流设计
+
+### 首次同步流程
+```
+CLI本地预处理 → 提取四要素 → POST /views/sync (branch) → Server创建视图 → 返回checkpoint_id
+```
+
+### 增量同步流程
+```
+文件变更 → CLI本地增量分析 → POST /views/sync (branch + checkpoint_id) → Server增量更新 → 返回新checkpoint_id
+```
+
+### 验证流程
+```
+用户执行命令 → CLI解析参数 → POST /verify (branch + checkpoint_id) → Server语义分析 → 返回验证结果
+```
+
+## 待办事项
+
+- [ ] 实现 checkpoint 冲突解决机制
+- [ ] 设计视图持久化存储格式
+- [ ] 定义增量同步的变更检测算法
+- [ ] 制定错误码和异常处理规范
+- [ ] 设计性能监控和指标收集
+
+## 相关文档
+
+- [产品计划书](../docs/PRODUCT_PLAN.md)
+- [语法规范](../docs/SYNTAX_SPECIFICATION.md)
+- [Spec 系统规范](../docs/SPEC_SYSTEM.md)
